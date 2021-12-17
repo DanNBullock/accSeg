@@ -53,13 +53,15 @@ for iInflations in range(10):
     for iSide in sideList:
         if iSide=='left':
             sideLabel=1000
+            #extract spine ROI
             targetSpineLocations =wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,[28, 16, 10])
         elif iSide=='right':
             sideLabel=2000
+            #extract spine ROI
             targetSpineLocations =wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,[ 16, 60, 49])
         #create a name stem
         tractName=iSide+'_ACC_targeted_streams_' + str(iInflations)
-        #extract spine ROI
+        
        
         #targetSpineLocationsBoolOut=WMA_pyFuncs.applyNiftiCriteriaToTract_DIPY_Test(streamlines, targetSpineLocations, True, 'either_end')
         
