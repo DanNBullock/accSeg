@@ -23,7 +23,7 @@ import dipy.io.streamline
 #ignore these if you aren't using the path creation function
 #(it's a local, project level helper function I use to automatically generate paths to specific files in a project)
 projectDictionary=makeMetaDictionary()
-testSubjectPaths=projectDictionary['100206']
+testSubjectPaths=projectDictionary['103515']
 #set this to the outdir you'd like for products of this processing
 outDir=testSubjectPaths['outDir']
 #set to freesurfer output path for this subject
@@ -34,15 +34,23 @@ fsPath=testSubjectPaths['freesurfer_2']
 dkAtlas=nib.load(os.path.join(fsPath,'mri/aparc.DKTatlas+aseg.nii.gz'))
 
 #set this to the path of the t1 for 
-refT1Path=testSubjectPaths['t1_2']
+refT1Path=testSubjectPaths['t1_1']
 refAnatT1=nib.load(refT1Path)
 
 # #performSegmentation
 #extract whole brain segmentation
 #set to path to target whole brain tractogram
-tractogramPath=testSubjectPaths['tractogram_2']
+#smaller = faster
+tractogramPath=testSubjectPaths['tractogram_1']
 tractogramLoad=nib.streamlines.load(tractogramPath)
 streamlines=wmaPyTools.streamlineTools.orientAllStreamlines(tractogramLoad.streamlines)
+#save an indicator of valid streamline endpoints to segment
+import dipy.tracking.utils as ut
+endpointStreams=wmaPyTools.streamlineTools.downsampleToEndpoints(streamlines)
+tractDensityNifti=ut.density_map(endpointStreams, refAnatT1.affine, refAnatT1.shape)
+densityNifti = nib.nifti1.Nifti1Image(tractDensityNifti, refAnatT1.affine, refAnatT1.header)
+nib.save(densityNifti,outDir+'endpointDensity.nii.gz')
+
 
 #dipyPlot
 sideList=['left','right']
@@ -54,15 +62,23 @@ for iInflations in range(10):
         if iSide=='left':
             sideLabel=1000
             #extract spine ROI
-            targetSpineLocations =wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,[28, 16, 10])
+            #28=LeftVentralDC
+            #16=brainStem
+            #10=leftThalamus
+            targetSpineLocations =wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,[16, 28, 10])
         elif iSide=='right':
             sideLabel=2000
             #extract spine ROI
+            #60=RightVentralDC
+            #16=brainStem
+            #49=leftThalamus
             targetSpineLocations =wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,[ 16, 60, 49])
         #create a name stem
         tractName=iSide+'_ACC_targeted_streams_' + str(iInflations)
+        #saveSpineLocations
+        nib.save(nib.nifti1.Nifti1Image(targetSpineLocations.get_fdata(), targetSpineLocations.affine),outDir+'/targetSpineLocations_ROI'+str(iInflations)+'.nii.gz')
         
-       
+        
         #targetSpineLocationsBoolOut=WMA_pyFuncs.applyNiftiCriteriaToTract_DIPY_Test(streamlines, targetSpineLocations, True, 'either_end')
         
         #generate ACC ROI
@@ -76,8 +92,10 @@ for iInflations in range(10):
         
         #generate roi for WM
         if sideLabel== 1000:
+            #41=RightCerebralWM
             contraWMROI=wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,41)
         elif sideLabel== 2000:
+            #2=LeftCerebralWM
             contraWMROI=wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,2)
         #use it as an exclusion criterion
         #contraWMExcludeBoolOut=WMA_pyFuncs.applyNiftiCriteriaToTract_DIPY_Test(streamlines, contraWMROI, False, 'any')
@@ -92,12 +110,19 @@ for iInflations in range(10):
         supCCBorder=wmaPyTools.roiTools.planeAtMaskBorder(ccROI,'superior')
         #now cut the paraCentralPlanar ROI with it
         supCCparaCantBorder=wmaPyTools.roiTools.sliceROIwithPlane(paraCGAntBorderROI,supCCBorder,'superior')
+        #saveROI
+        nib.save(nib.nifti1.Nifti1Image(supCCparaCantBorder.get_fdata(), supCCparaCantBorder.affine),outDir+'/supCCparaCantBorder_ROI'+str(iInflations)+'.nii.gz')
+        
+        
         #cingulum exclusion plane created
         
         #generate roi anterior border of rostralanteriorcingulate
         antCingROI=wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,sideLabel+26,2)
         #find the anterior border of it
         antCingBorderROI=wmaPyTools.roiTools.planeAtMaskBorder(antCingROI,'anterior')
+        #save ROI
+        nib.save(nib.nifti1.Nifti1Image(antCingBorderROI.get_fdata(), antCingBorderROI.affine),outDir+'/antCingBorderROI_ROI'+str(iInflations)+'.nii.gz')
+       
         #no further modification needed; anterior tranversal exclusion plane created
         
         #generate roi for posterior CC
@@ -109,13 +134,18 @@ for iInflations in range(10):
         infPostCCBorder=wmaPyTools.roiTools.planeAtMaskBorder(posteriorCC,'inferior')
         #now cut the posteriorCC ROI with it
         supPostCCBorder=wmaPyTools.roiTools.sliceROIwithPlane(posteriorCCborder,infPostCCBorder,'superior')
+        #save ROI
+        nib.save(nib.nifti1.Nifti1Image(supPostCCBorder.get_fdata(), supPostCCBorder.affine),outDir+'/supPostCCBorder_ROI'+str(iInflations)+'.nii.gz')
+        
         #posterior traversal exclusion ROI created
         
         #additional exclusion criteria lateral to thalamus and posterior to putamen, just for fun
         #obtain posterior border of putamen
         if sideLabel== 1000:
+            #left putamen
             putROI=wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,12)
         elif sideLabel== 2000:
+            #right putamen
             putROI=wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,51)
         #find it's posterior border
         posteriorPalBorder=wmaPyTools.roiTools.planeAtMaskBorder(putROI,'posterior')
@@ -127,14 +157,22 @@ for iInflations in range(10):
         elif sideLabel== 2000:
             thalROI=wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,49)
         #get it's lateral border
-        lateralThalBorder=wmaPyTools.roiTools.planeAtMaskBorder(thalROI,'lateral')
+        #use the supermarginal gyrus instead!  Thal can cross midline, 
+        #messing up interpretation of lateral here
+        superMarginalROI=wmaPyTools.roiTools.multiROIrequestToMask(dkAtlas,sideLabel+31)
+        medialSuperMarBorder=wmaPyTools.roiTools.planeAtMaskBorder(superMarginalROI,'medial')
         #clip the posteriorPalBorder with the lateralThalBorder, retain lateral portion
-        latPostPalBorder=wmaPyTools.roiTools.sliceROIwithPlane(posteriorPalBorder,lateralThalBorder,'lateral')
+        latPostPalBorder=wmaPyTools.roiTools.sliceROIwithPlane(posteriorPalBorder,medialSuperMarBorder,'lateral')
+        #save ROI
+        nib.save(nib.nifti1.Nifti1Image(latPostPalBorder.get_fdata(), latPostPalBorder.affine),outDir+'/latPostPalBorder_ROI'+str(iInflations)+'.nii.gz')
+       
         #posterio-lateral exclusion criteria created
         
         #it's actually faster to do it with this multi version than individually
         #this is why all of the individual segmentation steps are grayed out above
-        comboROIBool=wmaPyTools.segmentationTools.segmentTractMultiROI(streamlines, [inflatedACC,targetSpineLocations,contraWMROI,sfgROI,supCCparaCantBorder,supPostCCBorder,antCingBorderROI,latPostPalBorder], [True,True,False,False,False,False,False,False], ['any','either_end','any','either_end','any','any','any','any'])
+        #comboROIBool=wmaPyTools.segmentationTools.segmentTractMultiROI(streamlines, [inflatedACC,targetSpineLocations,contraWMROI,sfgROI,supCCparaCantBorder,supPostCCBorder,antCingBorderROI,latPostPalBorder], [True,True,False,False,False,False,False,False], ['any','either_end','any','either_end','any','any','any','any'])
+        comboROIBool=wmaPyTools.segmentationTools.segmentTractMultiROI(streamlines, [inflatedACC,targetSpineLocations,contraWMROI,sfgROI,supCCparaCantBorder,supPostCCBorder,antCingBorderROI], [True,True,False,False,False,False,False], ['any','either_end','any','either_end','any','any','any'])
+        
         print('multi seg complete')
         #saves the output tractogram
         wmaPyTools.streamlineTools.stubbornSaveTractogram(streamlines[comboROIBool],os.path.join(outDir,tractName+'.trk'))
