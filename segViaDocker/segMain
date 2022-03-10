@@ -1,0 +1,4 @@
+#!/bin/bash
+
+singularity exec --bind ../:/ docker://brainlife/dipy:master python ./ACCSeg_script.py
+

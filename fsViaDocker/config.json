@@ -1,0 +1,8 @@
+{
+    "t1": "../testdata/output/t1.nii.gz",
+    "hippocampal": true,
+    "notalcheck": true,
+    "hires": false,
+    "version": "7.1.0",
+    "expert_dis": ""
+}

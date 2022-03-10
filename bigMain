@@ -1,0 +1,5 @@
+./apcpAlignViaDocker/main
+./fsViaDocker/main
+./preProcViaDocker/main
+./trackViaDocker/tckMain
+./segViaDocker/segMain

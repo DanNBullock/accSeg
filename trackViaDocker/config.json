@@ -1,0 +1,8 @@
+{
+    
+    "fiberNumber" : 1000000,
+    "minLength" : 20,
+    "maxLength" : 150,
+    "od_centroid" : "../testdata/output/wmfod.mif"
+
+}
