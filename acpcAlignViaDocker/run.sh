@@ -11,7 +11,7 @@ set -e
 input=`jq -r '.input' config.json`
 template=`jq -r '.template' config.json`
 type=`jq -r '.type' config.json` #T1 or T2
-echo "$(ls  ../../)"
+echo "$(ls  ../)"
 echo "$(ls  )"
 echo "$(pwd)"
 product=""
@@ -48,7 +48,7 @@ flirt -interp spline -in input_robustfov.nii.gz -ref $template -omat roi2std.mat
 convert_xfm -omat full2std.mat -concat roi2std.mat full2roi.mat
 aff2rigid full2std.mat outputmatrix
 
-mkdir -p output
+
 applywarp --rel --interp=spline -i $input -r $template --premat=outputmatrix -o $output
 
 # make png
