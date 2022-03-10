@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ./apcpAlignViaDocker/main
 ./fsViaDocker/main
 ./preProcViaDocker/main
