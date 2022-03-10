@@ -11,7 +11,9 @@ set -e
 input=`jq -r '.input' config.json`
 template=`jq -r '.template' config.json`
 type=`jq -r '.type' config.json` #T1 or T2
-
+echo "$(ls  ../../)"
+echo "$(ls  )"
+echo "$(pwd)"
 product=""
 
 #we use space from
