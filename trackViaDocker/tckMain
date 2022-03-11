@@ -1,0 +1,1 @@
+singularity exec --bind //home/heilb028/:/mnt -e docker://brainlife/mrtrix3:3.0.0 ./basicTCKgen.sh

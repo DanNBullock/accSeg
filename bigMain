@@ -1,0 +1,9 @@
+#!/bin/bash
+
+mkdir -p testdata/output
+
+./apcpAlignViaDocker/main
+./fsViaDocker/main
+./preProcViaDocker/main
+./trackViaDocker/tckMain
+./segViaDocker/segMain
