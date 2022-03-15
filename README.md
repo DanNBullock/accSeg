@@ -1,4 +1,5 @@
-# ACC set
+# Anterior Cingulate Cortex segmentation
+An anatomically defined, subject specific tractography segmention of connections to the human anterior cingulate cortex.
 
 ## Overview description
 
