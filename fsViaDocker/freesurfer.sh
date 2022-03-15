@@ -3,8 +3,8 @@
 set -e
 set -x
 
-# t1=`jq -r .t1 config.json`
-t1=($(jq -r '.t1' config.json  | tr -d '[]," '))
+t1=`jq -r .t1 config.json`
+#t1=($(jq -r '.t1' config.json  | tr -d '[]," '))
 t2=`jq -r .t2 config.json`
 hippocampal=`jq -r .hippocampal config.json`
 thalamicnuclei=`jq -r .thalamicnuclei config.json`
@@ -71,13 +71,13 @@ if [ $thalamicnuclei == "true" ]; then
 fi
 
 #converting aparc to nifti
-mri_convert output/mri/aparc+aseg.mgz parc/parc.nii.gz
-mri_convert output/mri/aparc.a2009s+aseg.mgz parc2009/parc.nii.gz
-mri_convert output/mri/aparc.DKTatlas+aseg.mgz parcDKT/parc.nii.gz
+mri_convert output/mri/aparc+aseg.mgz output/mri/aparc+aseg.nii.gz
+mri_convert output/mri/aparc.a2009s+aseg.mgz output/mri/aparc.a2009s+aseg.nii.gz
+mri_convert output/mri/aparc.DKTatlas+aseg.mgz output/mri/aparc.DKTatlas+aseg.nii.gz
 
 #put freesurfer output under freesurfer directory
-mkdir freesurfer
-mv output freesurfer
+#mkdir freesurfer
+cp --force output ../testdata
 
 datatype_tags=()
 echo "writing out product.json"

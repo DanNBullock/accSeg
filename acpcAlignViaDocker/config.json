@@ -1,5 +1,5 @@
 {
-    "input": "../../testdata/t1.nii.gz",
+    "input": "../testdata/t1.nii.gz",
     "template": "MNI152_1mm(MNI152_1mm)",
     "type": "T1"
 }

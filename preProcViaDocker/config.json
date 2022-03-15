@@ -1,5 +1,5 @@
 {
-    "rpe": "none",
+    "rpe": "",
     "acqd": "AP",
     "denoise": true,
     "degibbs": true,
@@ -10,24 +10,23 @@
     "nval": 1000,
     "acpc": true,
     "reslice": "1",
-
-    "eddy_data_is_shelled": true,
+    "eddy_data_is_shelled": false,
     "eddy_slm": "linear",
-
     "eddy_niter": 5,
-    "eddy_repol": true,
+    "eddy_repol": false,
     "eddy_mporder": 0,
-
-    "eddy_slspec": "hi there\n1 1 1\n3 3 3",
-
+    "eddy_slspec": "",
     "round_bvals-dis": true,
-
     "anat": "../testdata/output/t1.nii.gz",
     "bvec": "../testdata/ap/dwi.bvecs",
     "bval": "../testdata/ap/dwi.bvals",
     "diff": "../testdata/ap/dwi.nii.gz",
-
     "rbvc": "../testdata/pa/dwi.bvecs",
     "rbvl": "../testdata/pa/dwi.bvals",
-    "rdif": "../testdata/pa/dwi.nii.gz"
+    "rdif": "../testdata/pa/dwi.nii.gz",
+    "topup_lambda" :"0.005,0.001,0.0001,0.000015,0.000005,0.0000005,0.00000005,0.0000000005,0.00000000001",
+    "antsb" : "[150,3]",
+    "antsc" : "[200x200,1e-6]",
+    "antss" : 2,
+    "bias_method" : "ants"
 }

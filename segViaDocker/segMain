@@ -1,4 +1,6 @@
 #!/bin/bash
 
-singularity exec --bind ../:/ docker://brainlife/dipy:master python ./ACCSeg_script.py
+git clone --branch packageVers https://github.com/DanNBullock/wma_pyTools.git
+
+singularity exec --bind ../:/ docker://nipype/nipype:latest python ./ACCSeg_script.py
 

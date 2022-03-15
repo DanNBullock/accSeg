@@ -25,6 +25,13 @@ mask=b0_dwi_brain_mask
 rm -rf ./tmp ./eddyqc cor1.b cor2.b corr.b
 mkdir -p ./tmp
 
+## Dan edit
+## alter the default mrtrix config to be more accomidating of b0 values
+echo "BZeroThreshold: 50" > ~/.mrtrix.conf
+cat ~/.mrtrix.conf
+ls ~/
+
+
 common="-nthreads $OMP_NUM_THREADS -quiet -force"
 
 ##
@@ -170,7 +177,7 @@ else
 	       ## drop any volumes w/ a sufficiently high bval to be a direction - often makes an odd sequence even
 	       echo "The RPE file has an odd number of volumes. Only the b0 volumes were extracted."
 	       #dwiextract -bzero raw2.mif raw2.mif $common
-	       dwiextract -bzero raw2.mif rpe_${difm}.mif $common
+	       dwiextract -config BZeroThreshold 50 -bzero raw2.mif rpe_${difm}.mif $common
 	       ob0=`mrinfo -size raw2.mif | grep -oE '[^[:space:]]+$'`
 	       echo "This should be an even number: $ob0"
 	       ## this doesn't stop or exit if it's still odd...
@@ -193,7 +200,11 @@ if [ $RPE == "all" ]; then
     cat raw1.b raw2.b > raw.b
     
     echo "creating dwimask (dwi2mask) from merged data ..."
-    dwi2mask raw.mif ${mask}.mif $common
+    ## Dan note: trying fslbet method
+    #dwi2mask raw.mif ${mask}.mif $common
+    mrconvert raw.mif raw.nii.gz -force
+    bet2 raw.nii.gz ${mask}.nii.gz -m -f 0.1 -g 0.3
+    mrconvert ${mask}.nii.gz ${mask}.mif -force
 
     ## check and correct gradient orientation and create corrected image
     echo "Identifying correct gradient orientation..."
@@ -202,7 +213,11 @@ if [ $RPE == "all" ]; then
 
 else
     echo "creating dwimask (dwi2mask) from raw1.mif ..."
-    dwi2mask raw1.mif ${mask}.mif $common
+    #dwi2mask raw1.mif ${mask}.mif $common
+    ## Dan note: trying fslbet method
+    mrconvert raw1.mif raw1.nii.gz -force
+    bet2 raw1.nii.gz ${mask}.nii.gz -m -f 0.1 -g 0.3
+    mrconvert ${mask}.nii.gz ${mask}.mif -force
 
     ## check and correct gradient orientation and create corrected image
     echo "Identifying correct gradient orientation..."
@@ -264,14 +279,14 @@ if [ $DO_EDDY == "true" ]; then
     echo "Performing Eddy correction (dwifslpreproc)... rpe:$RPE"
     
     if [ $RPE == "none" ]; then
-	dwifslpreproc ${difm}.mif ${difm}_eddy.mif -rpe_none -pe_dir ${ACQD} -eddy_options "$eddy_options" $common_fslpreproc
+	dwifslpreproc -config BZeroThreshold 50 ${difm}.mif ${difm}_eddy.mif -rpe_none -pe_dir ${ACQD} -eddy_options "-config BZeroThreshold=50 $eddy_options" $common_fslpreproc
         difm=${difm}_eddy
     fi
 
     if [ $RPE == "pairs" ]; then
 
         ## pull the b0s
-        dwiextract -bzero ${difm}.mif fpe_b0.mif $common
+        dwiextract -config BZeroThreshold 50 -bzero ${difm}.mif fpe_b0.mif $common
         mrconvert rpe_${difm}.mif rpe_b0.mif $common 
 
 	## grab the size of each sequence
@@ -299,12 +314,13 @@ if [ $DO_EDDY == "true" ]; then
 	fi
 	
         ## call to dwifslpreproc w/ new options
-        dwifslpreproc ${difm}.mif ${difm}_eddy.mif -rpe_pair -se_epi b0_pairs.mif -pe_dir ${ACQD} -align_seepi -topup_options "$topup_options" -eddy_options "$eddy_options" $common_fslpreproc
+        dwifslpreproc -config BZeroThreshold 50 ${difm}.mif ${difm}_eddy.mif -rpe_pair -se_epi b0_pairs.mif -pe_dir ${ACQD} -align_seepi -topup_options "$topup_options" -eddy_options "-config BZeroThreshold=50 $eddy_options" $common_fslpreproc
         difm=${difm}_eddy
     fi
 
     if [ $RPE == "all" ]; then
-        dwifslpreproc ${difm}.mif ${difm}_eddy.mif -rpe_all -pe_dir ${ACQD} -topup_options "$topup_options" -eddy_options "$eddy_options" $common_fslpreproc
+    
+        dwifslpreproc -config BZeroThreshold 50 ${difm}.mif ${difm}_eddy.mif -rpe_all -pe_dir ${ACQD} -topup_options "$topup_options" -eddy_options "$eddy_options" $common_fslpreproc
         difm=${difm}_eddy
     fi
 
@@ -369,7 +385,7 @@ fi
 echo "Creating dwi space b0 reference images..."
 
 ## create b0 and mask image in dwi space on forward direction only
-dwiextract ${difm}.mif - -bzero $common | mrmath - mean b0_dwi.mif -axis 3 $common
+dwiextract -config BZeroThreshold 50 ${difm}.mif - -bzero $common | mrmath - mean b0_dwi.mif -axis 3 $common
 
 ## compute dwi mask for processing
 dwi2mask ${difm}.mif ${mask}.mif $common
@@ -433,7 +449,7 @@ fi
 echo "Creating $out space b0 reference images..."
 
 ## create final b0 / mask
-dwiextract ${difm}.mif - -bzero $common | mrmath - mean b0_${out}.mif -axis 3 $common
+dwiextract -config BZeroThreshold 50 ${difm}.mif - -bzero $common | mrmath - mean b0_${out}.mif -axis 3 $common
 dwi2mask ${difm}.mif b0_${out}_brain_mask.mif $common
 
 ## create output space b0s

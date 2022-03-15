@@ -3,6 +3,8 @@
     "hippocampal": true,
     "notalcheck": true,
     "hires": false,
-    "version": "7.1.0",
-    "expert_dis": ""
+    "expert_dis": "",
+    "localGI": false,
+    "cw256": false
+    
 }
