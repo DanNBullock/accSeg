@@ -1,9 +1,81 @@
 #!/bin/bash
 
-mkdir -p testdata/output
+gitTopDir="$(git rev-parse --show-toplevel)"
 
-./apcpAlignViaDocker/main
-./fsViaDocker/main
-./preProcViaDocker/main
-./trackViaDocker/tckMain
-./segViaDocker/segMain
+mkdir -p $gitTopDir/testdata/output
+
+acpcFlag=`jq -r '.doACPC' config.json`
+FSFlag=`jq -r '.doFS' config.json`
+DWIprocFlag=`jq -r '.doDWIpreProc' config.json`
+ANAT=`jq -r '.anat' config.json`
+cleanFlag=`jq -r '.doClean' config.json`
+plotFlag=`jq -r '.doPlot' config.json`
+
+
+if $acpcFlag
+then
+    cp config.json $gitTopDir/apcpAlignViaDocker/config.json
+    #cd apcpAlignViaDocker
+    $gitTopDir/apcpAlignViaDocker/main
+    #copy over the outputs
+    #cd ..
+fi
+
+if $FSFlag
+then
+    cp config.json $gitTopDir/fsViaDocker/config.json
+    #cd fsViaDocker
+    $gitTopDir/fsViaDocker/main
+    #copy over the outputs
+    #cp 
+    #cd ..
+fi
+
+if $preProcViaDocker
+then
+    echo "preprocessing DWI and aligning to T1"
+    echo "$(pwd)"
+    cp config.json $gitTopDir/preProcViaDocker/config.json
+    #cd preProcViaDocker
+    $gitTopDir/preProcViaDocker/main
+    #cd ..
+    #where is this outputting, we need to copy over the output to the directory
+    #indicated in the config.json
+fi
+
+cp config.json $gitTopDir/app-track_aLIC/config.json
+cp config.json $gitTopDir/app-track_aLIC/app-track-between-multiple-regions/config.json
+cp config.json $gitTopDir/app-track_aLIC/segViaDocker/config.json
+echo "Tracking and segmenting aLIC"
+echo "$(pwd)"
+#cd app-track_aLIC
+$gitTopDir/app-track_aLIC/app-track-between-multiple-regions/main
+$gitTopDir/app-track_aLIC/segViaDocker/segMain
+#cd ..
+
+#NOTE: by default the plotting code in $gitTopDir/plotFigs/main cleans
+# by default, so unless you want to do a double clean you should probably avoid
+#this 
+#actually, currently, $gitTopDir/plotFigs/main does not do this, so this is
+#recommended
+if $cleanFlag
+then
+    cp config.json $gitTopDir/app-filterViaQuickbundles/config.json
+    #cd app-filterViaQuickbundles
+    $gitTopDir/app-filterViaQuickbundles/main
+    #where is this outputting, we need to copy over the output to the directory
+    #indicated in the config.json
+    #cd ..
+    cp -r $gitTopDir/tck_survived/track.tck $gitTopDir/testdata/track.tck
+fi
+
+if $plotFlag
+then
+    cp config.json $gitTopDir/plotFigs/config.json
+    #cd plotFigs
+    $gitTopDir/plotFigs/main
+    #where is this outputting, we need to copy over the output to the directory
+    #indicated in the config.json
+    #cd ..
+    cp -r $gitTopDir/figs $gitTopDir/testdata/
+fi

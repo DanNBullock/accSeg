@@ -10,11 +10,11 @@
     "anat": "testdata/T1.nii.gz",
     "fsDir": "testdata",
     "freesurfer": "testdata",
-    "tractogram": "testdata/tract.tck",
+    "tractogram": "testdata/track.tck",
     "ens_lmax": true,
     "imaxs": "8",
     "curvs": "5 10 20 40 80",
-    "num_fibers": "30000",
+    "num_fibers": "3000",
     "min_length": "10",
     "max_length": "200",
     "tensor_fit": "",
@@ -58,7 +58,8 @@
     "antsc" : "[200x200,1e-6]",
     "antss" : 2,
     "bias_method" : "ants",
-    "streamThresh":	"5"
+    "streamThresh":	8,
+    "qbThreshes":[30,20,10,3]
 	
 	
 }

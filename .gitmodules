@@ -1,3 +1,12 @@
 [submodule "wma_pyTools"]
 	path = wma_pyTools
 	url = git@github.com:DanNBullock/wma_pyTools.git
+[submodule "app-filterViaQuickbundles"]
+	path = app-filterViaQuickbundles
+	url = https://github.com/DanNBullock/app-filterViaQuickbundles.git
+[submodule "app-track_aLIC"]
+	path = app-track_aLIC
+	url = https://github.com/DanNBullock/app-track_aLIC
+[submodule "jq"]
+	path = jq
+	url = https://github.com/stedolan/jq.git

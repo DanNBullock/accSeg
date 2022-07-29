@@ -1,0 +1,33 @@
+{
+    "rpe": "none",
+    "acqd": "AP",
+    "denoise": true,
+    "degibbs": true,
+    "eddy": true,
+    "bias": true,
+    "ricn": true,
+    "norm": false,
+    "nval": 1000,
+    "acpc": true,
+    "reslice": "1",
+
+    "eddy_data_is_shelled": true,
+    "eddy_slm": "linear",
+
+    "eddy_niter": 5,
+    "eddy_repol": true,
+    "eddy_mporder": 0,
+
+    "eddy_slspec": "hi there\n1 1 1\n3 3 3",
+
+    "round_bvals-dis": true,
+
+    "anat": "../testdata/output/t1.nii.gz",
+    "bvec": "../testdata/ap/dwi.bvecs",
+    "bval": "../testdata/ap/dwi.bvals",
+    "diff": "../testdata/ap/dwi.nii.gz",
+
+    "rbvc": "../testdata/pa/dwi.bvecs",
+    "rbvl": "../testdata/pa/dwi.bvals",
+    "rdif": "../testdata/pa/dwi.nii.gz"
+}

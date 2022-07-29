@@ -1,0 +1,8 @@
+*.nii.gz
+*.txt
+*.tck
+wmc*
+dwi*
+eddyqc
+output
+*.csv

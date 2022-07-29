@@ -1,0 +1,13 @@
+#!/bin/bash
+#PBS -l nodes=1:ppn=16
+#PBS -l walltime=02:00:00
+#PBS -l vmem=64gb
+
+gitTopDir="$(git rev-parse --show-toplevel)"
+
+cp config.json $gitTopDir/plotFigs/config.json
+
+export SINGULARITYENV_LD_LIBRARY_PATH=$CUDA91PATH/lib64
+
+# run the actual python code
+singularity exec -e --nv docker://brainlife/dipy:latest python3 $gitTopDir/plotFigs/manualSelectPlot_func_clean.py

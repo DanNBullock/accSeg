@@ -32,49 +32,49 @@ common="-nthreads $OMP_NUM_THREADS -quiet -force"
 ##
 
 ## raw inputs
-DIFF=`jq -r '.diff' config.json`
-BVAL=`jq -r '.bval' config.json`
-BVEC=`jq -r '.bvec' config.json`
+DIFF=`jq -r '.fdiff' .$gitTopDir/preProcViaDocker/config.json`
+BVAL=`jq -r '.fbval' .$gitTopDir/preProcViaDocker/config.json`
+BVEC=`jq -r '.fbvec' .$gitTopDir/preProcViaDocker/config.json`
 
-ANAT=`jq -r '.anat' config.json`
+ANAT=`jq -r '.anat' .$gitTopDir/preProcViaDocker/config.json`
 
 ## optional reverse phase encoded (rpe) inputs
-RDIF=`jq -r '.rdif' config.json` ## optional
-RBVL=`jq -r '.rbvl' config.json` ## optional
-RBVC=`jq -r '.rbvc' config.json` ## optional
+RDIF=`jq -r '.rdiff' .$gitTopDir/preProcViaDocker/config.json` ## optional
+RBVL=`jq -r '.rbval' .$gitTopDir/preProcViaDocker/config.json` ## optional
+RBVC=`jq -r '.rbvec' .$gitTopDir/preProcViaDocker/config.json` ## optional
 
-ROUND_BVALS=`jq -r '.round_bvals' config.json`
+ROUND_BVALS=`jq -r '.round_bvals' .$gitTopDir/preProcViaDocker/config.json`
 
 ## acquisition direction: RL, PA, IS
-ACQD=`jq -r '.acqd' config.json`
+ACQD=`jq -r '.acqd' .$gitTopDir/preProcViaDocker/config.json`
 
 ## switches for potentially optional steps
-DO_DENOISE=`jq -r '.denoise' config.json`
-DO_DEGIBBS=`jq -r '.degibbs' config.json`
-DO_EDDY=`jq -r '.eddy' config.json`
-DO_BIAS=`jq -r '.bias' config.json`
-DO_RICN=`jq -r '.ricn' config.json`
-DO_NORM=`jq -r '.norm' config.json`
-DO_ACPC=`jq -r '.acpc' config.json`
-NEW_RES=`jq -r '.reslice' config.json`
-NORM=`jq -r '.nval' config.json`
-PRCT=`jq -r '.prct' config.json`
+DO_DENOISE=`jq -r '.denoise' .$gitTopDir/preProcViaDocker/config.json`
+DO_DEGIBBS=`jq -r '.degibbs' .$gitTopDir/preProcViaDocker/config.json`
+DO_EDDY=`jq -r '.eddy' .$gitTopDir/preProcViaDocker/config.json`
+DO_BIAS=`jq -r '.bias' .$gitTopDir/preProcViaDocker/config.json`
+DO_RICN=`jq -r '.ricn' .$gitTopDir/preProcViaDocker/config.json`
+DO_NORM=`jq -r '.norm' .$gitTopDir/preProcViaDocker/config.json`
+DO_ACPC=`jq -r '.acpc' .$gitTopDir/preProcViaDocker/config.json`
+NEW_RES=`jq -r '.reslice' .$gitTopDir/preProcViaDocker/config.json`
+NORM=`jq -r '.nval' .$gitTopDir/preProcViaDocker/config.json`
+PRCT=`jq -r '.prct' .$gitTopDir/preProcViaDocker/config.json`
 
 ## switch and advanced options for bias correction
-BIAS_METHOD=`jq -r '.bias_method' config.json`
-ANTSB=`jq -r '.antsb' config.json`
-ANTSC=`jq -r '.antsc' config.json`
-ANTSS=`jq -r '.antss' config.json`
+BIAS_METHOD=`jq -r '.bias_method' .$gitTopDir/preProcViaDocker/config.json`
+ANTSB=`jq -r '.antsb' .$gitTopDir/preProcViaDocker/config.json`
+ANTSC=`jq -r '.antsc' .$gitTopDir/preProcViaDocker/config.json`
+ANTSS=`jq -r '.antss' .$gitTopDir/preProcViaDocker/config.json`
 
 ## fill in arguments common to all dwifslpreproc calls
 common_fslpreproc="-eddy_mask ${mask}.mif -eddyqc_all ./eddyqc -scratch ./tmp -nthreads $OMP_NUM_THREADS -force"
 
 ## add advanced options to eddy call
-eddy_data_is_shelled=`jq -r '.eddy_data_is_shelled' config.json`
-eddy_slm=`jq -r '.eddy_slm' config.json`
-eddy_niter=`jq -r '.eddy_niter' config.json`
-eddy_repol=`jq -r '.eddy_repol' config.json`
-eddy_mporder=`jq -r '.eddy_mporder' config.json`
+eddy_data_is_shelled=`jq -r '.eddy_data_is_shelled' .$gitTopDir/preProcViaDocker/config.json`
+eddy_slm=`jq -r '.eddy_slm' .$gitTopDir/preProcViaDocker/config.json`
+eddy_niter=`jq -r '.eddy_niter' .$gitTopDir/preProcViaDocker/config.json`
+eddy_repol=`jq -r '.eddy_repol' .$gitTopDir/preProcViaDocker/config.json`
+eddy_mporder=`jq -r '.eddy_mporder' .$gitTopDir/preProcViaDocker/config.json`
 
 eddy_options=" " ## must contain at least 1 space according to mrtrix doc
 [ "$eddy_repol" == "true" ] && eddy_options="$eddy_options --repol"
@@ -444,8 +444,14 @@ fslmaths b0_${out}.nii.gz -mas b0_${out}_brain_mask.nii.gz b0_${out}_brain.nii.g
 echo "Creating preprocessed dwi files in $out space..."
 
 ## convert to nifti / fsl output for storage
-mkdir -p output
-mrconvert ${difm}.mif ../testdata/output/dwi.nii.gz -export_grad_fsl ../testdata/output/dwi.bvecs ../testdata/output/dwi.bvals -export_grad_mrtrix ${difm}.b -json_export ${difm}.json $common
+#hope this has already been created
+#mkdir -p output
+#out vars for subsequent steps
+outDIFF=`jq -r '.diff' .$gitTopDir/preProcViaDocker/config.json` 
+outBVAL=`jq -r '.bval' .$gitTopDir/preProcViaDocker/config.json` 
+outBVEC=`jq -r '.bvec' .$gitTopDir/preProcViaDocker/config.json` 
+
+mrconvert ${difm}.mif ${outDIFF} -export_grad_fsl ${outBVEC} ${outBVAL} -export_grad_mrtrix ${difm}.b -json_export ${difm}.json $common
 
 ## export a lightly structured text file (json?) of shell count / lmax
 echo "Writing text file of basic sequence information..."
